@@ -1,65 +1,85 @@
-.register_container{
-  display: flex;
-  flex-direction: column;
-  margin: auto;
-  margin-top: 2%;
-  background-color: darkturquoise;
-  min-width: 350px;
-  width: 30%;
-}
+import React, { useState } from "react";
+import "./Register.css";
 
-.inputs{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+const Register = () => {
+  const [userName, setUserName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-.input{
-  display: flex;
-  flex-direction:row;
-  align-items: center;
-}
+  const gohome = () => {
+    window.location.href = window.location.origin;
+  };
 
-.input_field{
-  height:40px;
-  width:200px;
-  margin:.5cm;
-  font-size: medium;
-}
+  const register = async (e) => {
+    e.preventDefault();
+    setError("");
 
-.submit_panel{
-  display: flex;
-  flex-direction:column;
-  margin-top: 5%;
-  margin-bottom: 5%;
-}
+    const register_url = window.location.origin + "/djangoapp/register";
 
-.submit{
-  margin-left: 30%;
-  margin-right: 30%;
-  cursor: pointer;
-  font-size: large;
-  color: rgb(97, 64, 128);
-  border-radius: 10px;
-  height:50px;
-}
+    const res = await fetch(register_url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userName: userName,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+      }),
+    });
 
-.submit:hover {
-  background-color: wheat;
-}
+    const json = await res.json();
+    if (json.status) {
+      sessionStorage.setItem("username", json.userName);
+      window.location.href = window.location.origin;
+    } else if (json.error === "Already Registered") {
+      setError("The user with the same username is already registered");
+    } else {
+      setError("Registration failed. Please try again.");
+    }
+  };
 
-.header{
-  font: 4em sans-serif;
-  color: white;
-  margin: .5cm;
-}
+  return (
+    <div className="register_container" style={{ width: "50%", margin: "5% auto" }}>
+      <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <h2>Sign Up</h2>
+        <a href="/" onClick={() => { gohome(); }} style={{ fontSize: "1.5rem" }}>×</a>
+      </div>
+      <form onSubmit={register}>
+        <div className="mb-3">
+          <label htmlFor="username">Username</label>
+          <input id="username" type="text" className="form-control" placeholder="Username"
+                 onChange={(e) => setUserName(e.target.value)} required />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="firstName">First Name</label>
+          <input id="firstName" type="text" className="form-control" placeholder="First Name"
+                 onChange={(e) => setFirstName(e.target.value)} required />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="lastName">Last Name</label>
+          <input id="lastName" type="text" className="form-control" placeholder="Last Name"
+                 onChange={(e) => setLastName(e.target.value)} required />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="email">Email</label>
+          <input id="email" type="email" className="form-control" placeholder="Email"
+                 onChange={(e) => setEmail(e.target.value)} required />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="password">Password</label>
+          <input id="password" type="password" className="form-control" placeholder="Password"
+                 onChange={(e) => setPassword(e.target.value)} required />
+        </div>
+        {error && <div className="alert alert-danger">{error}</div>}
+        <button type="submit" className="btn btn-primary">Register</button>
+        <button type="button" className="btn btn-secondary ms-2" onClick={gohome}>Cancel</button>
+      </form>
+    </div>
+  );
+};
 
-.img_icon{
-  width:40px;
-  margin:.1cm;
-  background-color:#0C9;
-  color:#FFF;
-  border-radius:50px;
-  text-align:center;
-  box-shadow: 2px 2px 3px #999;  
-}
+export default Register;
